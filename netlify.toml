@@ -1,0 +1,58 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Friendly API aliases → functions
+[[redirects]]
+  from = "/api/session/start"
+  to = "/.netlify/functions/session-start"
+  status = 200
+[[redirects]]
+  from = "/api/session/event"
+  to = "/.netlify/functions/session-event"
+  status = 200
+[[redirects]]
+  from = "/api/session/complete"
+  to = "/.netlify/functions/session-complete"
+  status = 200
+[[redirects]]
+  from = "/api/coach"
+  to = "/.netlify/functions/coach"
+  status = 200
+[[redirects]]
+  from = "/api/teacher/summary"
+  to = "/.netlify/functions/teacher-summary"
+  status = 200
+[[redirects]]
+  from = "/api/teacher/checkout"
+  to = "/.netlify/functions/teacher-checkout"
+  status = 200
+[[redirects]]
+  from = "/api/safety/review"
+  to = "/.netlify/functions/safety-review"
+  status = 200
+
+# Teacher route: served by the SPA. The security boundary is server-side — every teacher function verifies the
+# Identity JWT and requires the "teacher" role (see netlify/functions/_lib/http.mjs → requireTeacher).
+# If your Netlify plan includes role-based redirects you may additionally add a conditional rule here.
+# SPA fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
