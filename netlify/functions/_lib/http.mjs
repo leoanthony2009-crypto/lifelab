@@ -39,19 +39,6 @@ export function rateLimit(req, limit = 60, windowMs = 60_000) {
   if (b.n > limit) throw bad('too many requests', 429);
 }
 
-// ---- teacher auth: verify the Identity token server-side and require role "teacher" ---------
-export async function requireTeacher(req) {
-  const auth = req.headers.get('authorization') || '';
-  if (!auth.startsWith('Bearer ')) throw bad('sign in required', 401);
-  const site = process.env.URL || new URL(req.url).origin;
-  const r = await fetch(site + '/.netlify/identity/user', { headers: { authorization: auth } });
-  if (!r.ok) throw bad('sign in required', 401);
-  const user = await r.json();
-  const roles = user?.app_metadata?.roles || [];
-  if (!roles.includes('teacher')) throw bad('teacher role required', 403);
-  return user;
-}
-
 export const wrap = fn => async (req, ctx) => {
   try { return await fn(req, ctx); }
   catch (e) { if (e instanceof Response) return e; console.error(e); return bad('server error', 500); }

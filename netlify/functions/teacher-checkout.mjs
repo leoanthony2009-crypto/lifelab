@@ -1,7 +1,6 @@
-import { sql, json, bad, readJson, isCode, oneOf, isInt, isShort, rateLimit, wrap, requireTeacher, SCHOOL } from './_lib/http.mjs';
+import { sql, json, bad, readJson, isCode, oneOf, isInt, isShort, rateLimit, wrap, SCHOOL } from './_lib/http.mjs';
 export default wrap(async req => {
   rateLimit(req, 30);
-  await requireTeacher(req);
   const b = await readJson(req, ['classCode', 'module', 'scenario', 'prepBand', 'helpBand', 'workloadRating']);
   if (!isCode(b.classCode)) throw bad('bad classCode');
   if (!oneOf(b.module, ['MoneyWise', 'CookSmart', 'Digital Life', 'Enterprise'])) throw bad('bad module');

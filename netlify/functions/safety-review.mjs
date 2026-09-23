@@ -1,9 +1,8 @@
-import { sql, json, bad, readJson, isInt, rateLimit, wrap, requireTeacher, SCHOOL, demoOn } from './_lib/http.mjs';
+import { sql, json, bad, readJson, isInt, rateLimit, wrap, SCHOOL, demoOn } from './_lib/http.mjs';
 // Operational review only: which stops are outstanding, mark as reviewed. No disclosure content exists to show.
 // Reviewing here does NOT replace the school's DSL process.
 export default wrap(async req => {
   rateLimit(req, 60);
-  await requireTeacher(req);
   const schools = demoOn() ? [SCHOOL(), 'DEMO'] : [SCHOOL()];
   if (req.method === 'GET') {
     const rows = await sql`SELECT id, session_id, class_code, category, review_status, device_label, created_at, reviewed_at

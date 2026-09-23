@@ -10,7 +10,7 @@ const load = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSO
 const speak = t => { if (!window.speechSynthesis) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang = 'en-GB'; u.rate = 0.95; speechSynthesis.speak(u); };
 const hits = (text, s) => Math.min(100, Math.round((s.lookFor.filter(k => text.toLowerCase().includes(k)).length / 3) * 100));
 const Listen = ({ text, small }) => <button type="button" className={'btn ghost' + (small ? ' small' : '')} aria-label="Listen" onClick={() => speak(text)}>▶ Listen</button>;
-const Steps = ({ at }) => <div className="steps" aria-label="Progress">{['Explore', 'Think', 'Try', 'Reflect', 'Apply'].map((l, i) => <span key={l} className={'step' + (i <= at ? ' on' : '')}>{l}</span>)}</div>;
+const Steps = ({ at }) => <ol className="steps" aria-label="Progress">{['Explore', 'Think', 'Try', 'Reflect', 'Apply'].map((l, i) => <li key={l} className={'step' + (i <= at ? ' on' : '') + (i === at ? ' now' : '')} aria-current={i === at ? 'step' : undefined}><i aria-hidden="true" />{l}</li>)}</ol>;
 const Choices = ({ options, value, onChange, multi }) => (
   <div className="col" role="group">{options.map((o, i) => { const on = multi ? value.includes(i) : value === i; return (
     <button type="button" key={o} className={'choice' + (on ? ' on' : '')} aria-pressed={on} onClick={() => onChange(multi ? (on ? value.filter(v => v !== i) : [...value, i]) : i)}><span className="dot" aria-hidden="true" />{o}</button>); })}</div>);
@@ -40,7 +40,7 @@ function Home({ classCode, setClassCode, device, setDevice, passport, onModule }
     <main className="wrap">
       <header className="row between">
         <div className="row"><img src="/icons/icon-192.png" alt="" width="40" height="40" style={{ borderRadius: 12 }} /><div><div className="eyebrow">Future Skills</div><h1 style={{ fontSize: 24 }}>Life Lab</h1></div></div>
-        <button type="button" className="btn ghost small" onClick={() => setEditing(true)} aria-label={`Class code ${classCode || 'not set'}, change`}>Class {classCode || '—'}</button>
+        <button type="button" className="btn ghost small" onClick={() => setEditing(true)} aria-label={`Class code ${classCode || 'not set'}, change`}>{classCode ? `Class ${classCode}` : 'Enter class code'}</button>
       </header>
       {editing && <form className="card col" onSubmit={e => { e.preventDefault(); if (/^[A-Z0-9-]{2,12}$/.test(draft)) { setClassCode(draft); setDevice(dev.trim()); setEditing(false); } }}>
         <h2 style={{ fontSize: 22 }}>Type the code your teacher gave you.</h2>
@@ -61,7 +61,7 @@ function Home({ classCode, setClassCode, device, setDevice, passport, onModule }
       </div>
       <Passport passport={passport} />
       <p className="muted small" style={{ marginTop: 'auto' }}><strong>About your data.</strong> Life Lab records anonymous information about how activities are completed so teachers can understand whether the programme is supporting learning. It does not need your name, home address or personal financial information. {done} stamped on this device.</p>
-      <a href="/teacher" className="muted small">Teacher view</a>
+      <a href="/teacher" className="btn ghost small" style={{ alignSelf: 'flex-start' }}>Teacher view</a>
     </main>);
 }
 
@@ -143,7 +143,7 @@ function Session({ s, classCode, device, onExit, onStamp }) {
   return (
     <main className="wrap" style={{ '--accent': th.accent, '--soft': th.soft }}>
       {lowTime && <div className="timer" role="status">{String(Math.floor(remaining / 60)).padStart(2, '0')}:{String(remaining % 60).padStart(2, '0')} left · wrap up soon</div>}
-      <div className="row between"><button type="button" className="back" onClick={onExit}>← {MODULE_OF(s)}</button><Steps at={stageIdx} /></div>
+      <div className="topbar"><div className="row between"><button type="button" className="back" style={{ minHeight: 36, padding: 0 }} onClick={onExit}>← {MODULE_OF(s)}</button><span className="small muted">Level {SCENARIOS.filter(x => MODULE_OF(x) === MODULE_OF(s)).indexOf(s) + 1}</span></div><Steps at={stageIdx} /></div>
       <div><div className="eyebrow" style={{ color: th.accent }}>{s.year} · {s.focus}</div><h1 style={{ fontSize: 30 }}>{s.title}</h1></div>
       {err && <div className="warn" role="alert">{err}</div>}
       {pd && <div className="card col" role="dialog" aria-modal="true" style={{ borderColor: 'var(--warn)' }}><div className="eyebrow" style={{ color: 'var(--warn)' }}>Keep it fictional</div><strong>That looks like {pd}.</strong><span className="small">Nothing has been saved. Use a made-up one instead — your thinking is what counts.</span><button type="button" className="btn small" onClick={() => setPd('')}>Edit my answer</button></div>}
@@ -157,7 +157,7 @@ function Session({ s, classCode, device, onExit, onStamp }) {
           <strong style={{ fontSize: 17 }}>{A.baseline.q}</strong>
           <Choices options={A.baseline.options} value={baseline} onChange={setBaseline} />
           <button type="button" className="btn" disabled={baseline == null || !sid || busy} onClick={submitBaseline}>Lock in my answer →</button>
-          {!sid && !err && <span className="muted small">Connecting…</span>}
+          {!sid && !err && <span className="muted small" role="status">Connecting to your class…</span>}
         </section>
       </>}
 
@@ -200,7 +200,7 @@ function Session({ s, classCode, device, onExit, onStamp }) {
       </section>}
 
       {stage === 'done' && <>
-        <div style={{ alignSelf: 'center', width: 110, height: 110, borderRadius: '50%', background: th.accent, color: '#fff', display: 'grid', placeItems: 'center', transform: 'rotate(-8deg)' }}><span className="display" style={{ fontSize: 28, fontWeight: 800, textAlign: 'center' }}>{s.short}<br /><span style={{ fontSize: 11, letterSpacing: '.14em' }}>STAMPED</span></span></div>
+        <div className="pop" style={{ alignSelf: 'center', width: 120, height: 120, borderRadius: '50%', background: th.accent, color: '#fff', display: 'grid', placeItems: 'center', boxShadow: '0 12px 30px -12px rgba(28,27,24,.4)' }}><span className="display" style={{ fontSize: 28, fontWeight: 800, textAlign: 'center' }}>{s.short}<br /><span style={{ fontSize: 11, letterSpacing: '.14em' }}>STAMPED</span></span></div>
         <h2 style={{ fontSize: 28, textAlign: 'center' }}>{SKILLS[s.id] ? 'Enterprise Challenge Complete' : 'Nicely done.'}</h2>
         <p className="muted" style={{ textAlign: 'center' }}>{attempts.length} attempt{attempts.length === 1 ? '' : 's'}, highest hint {hint}. Independent challenge: <strong>{(outcome?.apply ?? applyScore) === 100 ? 'Completed' : 'Attempted'}</strong>.{outcome?.completedWithoutAi ? ' No AI help was shown.' : ''}</p>
         {SKILLS[s.id] && <div className="card"><strong>You practised:</strong><ul style={{ margin: '8px 0 0', paddingLeft: 20 }}>{SKILLS[s.id].map(k => <li key={k}>✓ {k}</li>)}</ul></div>}

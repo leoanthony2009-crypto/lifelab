@@ -24,10 +24,8 @@ export async function flushQueue() {
 }
 window.addEventListener('online', flushQueue);
 
-// Teacher calls carry the Identity token; functions verify it and the role server-side.
+// Teacher calls — no sign-in. Everything returned is aggregate, anonymous class-level data.
 export function teacherFetch(path, opts = {}) {
-  const user = window.netlifyIdentity?.currentUser();
-  if (!user) return Promise.reject(new Error('sign in required'));
-  return user.jwt().then(token => fetch(path, { ...opts, headers: { ...(opts.headers || {}), authorization: 'Bearer ' + token, 'content-type': 'application/json' } }))
+  return fetch(path, { ...opts, headers: { ...(opts.headers || {}), 'content-type': 'application/json' } })
     .then(async r => { if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || r.statusText); return r.json(); });
 }

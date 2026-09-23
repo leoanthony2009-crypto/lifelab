@@ -1,9 +1,8 @@
-import { sql, json, bad, rateLimit, wrap, requireTeacher, SCHOOL, demoOn } from './_lib/http.mjs';
+import { sql, json, bad, rateLimit, wrap, SCHOOL, demoOn } from './_lib/http.mjs';
 // Aggregates the six evidence areas. Class-level only — no per-pupil rows, no ranking, no risk scoring.
 const MODULES = ['MoneyWise', 'CookSmart', 'Digital Life', 'Enterprise'];
 export default wrap(async req => {
   rateLimit(req, 60);
-  await requireTeacher(req);
   const u = new URL(req.url);
   const f = k => u.searchParams.get(k) || null;
   const module = MODULES.includes(f('module')) ? f('module') : null;
